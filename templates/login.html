@@ -1,0 +1,23 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<div class="header-bar">
+    <h1>Login</h1>
+</div>
+<div class="card-body">
+{% if not request.user.is_authenticated %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input class="button" type="submit" value="Login Now">
+    <small> <p>Don't have an account yet? <a href="{% url 'signup' %}">Sign Up </a></p>
+    </small>
+    </form>
+{% else %}
+<p>You're already logged in! Would you like to <a href =  "{% url 'logout' %}"> Logout? </a></p>
+<p>Would you like to continue to <a href =  "{% url 'todos' %}"> Home? </a></p>
+
+{% endif %}
+</div>
+{% endblock content %}

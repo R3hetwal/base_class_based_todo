@@ -1,0 +1,63 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<div class="header-bar">
+    <div>
+        <h1>Hello {{ request.user|title }}</h1>
+        <h3>You have <i>{{ count }} incomplete task{{ count|pluralize:'s' }}</i></h3>
+    </div>
+    {% if request.user.is_authenticated %}
+    <a href="{% url 'logout' %}">Logout</a>
+    {% else %}
+    <a href="{% url 'login' %}">Login</a>
+{% endif %}
+</div>
+
+{% if request.user.is_authenticated %}
+<div id="search-add-wrapper">
+    <form action="" method="get">
+        <input type="text" name="search-area" placeholder="Search Tasks ">
+        <input class="button" type="submit" value="Search Task">
+    </form>
+    <a id="add-link" href="{% url 'todo-create' %}">&#x2b;</a>
+</div>
+
+<div class="card-bdy">
+    
+<div class="task-items-wrapper">
+    {% for todo in tasks %}
+    {% comment %} <p>{{todo}}</p> {% endcomment %}
+        <div class="task-wrapper">
+            {% if todo.complete %}
+                {% comment %} <p>{{todo}}</p> {% endcomment %}
+                <div class="task-title">
+                    <div class="task-complete-icon"></div>
+                        <i><s><a href="{% url 'todo-update' todo.pk %}">{{ todo }}</a></s></i> 
+                </div>
+                 <a class="delete-link" href="{% url 'todo-delete' todo.pk %}">&#215;</a> 
+
+            {% else %}
+                <div class="task-title">
+                    <div class="task-incomplete-icon"></div>
+                    <a href="{% url 'todo-update' todo.pk %}">{{ todo }}</a> 
+                </div>
+                <a class="delete-link" href="{% url 'todo-delete' todo.pk %}">&#215;</a> 
+                {% comment %}  &#215 denotes a cross sign which when user clicks,
+                 sends a request to the server to delete the task with the specified primary key.{% endcomment %}
+            {% endif %} 
+            
+       </div>  
+    {% empty %}
+        <h3>No items in list</h3>
+        <a href="{% url 'todo-create' %}">Add New Item</a>
+    {% endfor %}
+
+</div>
+
+</div>
+{% else %}
+<big><p>You're not logged in! Would you like to <a href =  "{% url 'login' %}"> Login? </a></p></big>
+<big><p>Don't have an account? Would you like to <a href =  "{% url 'signup' %}"> Signup? </a></p></big>
+{% endif %}
+{% endblock content %}

@@ -1,0 +1,23 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<div class="header-bar">
+    <h1>Logout</h1>
+    <div>
+        <a href="{% url 'todos' %}">&#8592; Go Back</a>
+    </div>
+  
+</div>
+<div class="card-body">
+{% if request.user.is_authenticated %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <p> Are you sure you want to Logout ? </p>
+        <input class="button" type="submit" value="Yes">
+    </form>
+{% else %}
+<p>You're not logged in! Would you like to <a href =  "{% url 'login' %}"> Login? </a></p>
+{% endif %}
+</div>
+{% endblock content %}
