@@ -3,11 +3,18 @@ from todo_class.models import Task
 from django.views import View
 from todo_class.forms import *
 from django.http import HttpResponse
+from django.core.exceptions import PermissionDenied
+
 
 # Create your views here.
-class ErrorPageView(View):
+class ForbiddenPageView(View):
     def get(self, request):
         return render(request, 'errors/403.html', status=403)
+
+class PageNotFoundView(View):
+    def get(self, request):
+        return render(request, 'errors/404.html', status=404)
+
 
 class TaskList(View):
     def get(self, request):
@@ -23,6 +30,7 @@ class TaskList(View):
                     'search_input': search_input}
     
         return render(request, 'todo_list.html', context)
+
   
 class TaskCreate(View):
     def get(self, request):
@@ -40,9 +48,14 @@ class TaskCreate(View):
 class TaskUpdate(View):
     def get(self, request, pk):
         try:
-            task = Task.objects.get(id=pk, user=request.user.id)
+            task = Task.objects.get(id=pk)
+            try:
+                if task.user != request.user:
+                    raise PermissionDenied
+            except PermissionDenied:
+                return redirect('forbidden')
         except Task.DoesNotExist:
-            return redirect('forbidden')
+            return redirect('pagenotfound')
 
         form = UpdateForm(instance=task)
         context = {'form': form}
@@ -55,14 +68,18 @@ class TaskUpdate(View):
             form.save()
             return redirect('todos')
 
-
 class TaskDelete(View):
     def get(self, request, pk):
         try:
-            task = Task.objects.get(id=pk, user=request.user.id)
+            task = Task.objects.get(id=pk)
+            try:
+                if task.user != request.user:
+                    raise PermissionDenied
+            except PermissionDenied:
+                return redirect('forbidden')
+                
         except Task.DoesNotExist:
-            error_page_view = ErrorPageView.as_view()
-            return redirect('forbidden')
+            return redirect('pagenotfound')
 
         task = Task.objects.get(id=pk, user=request.user.id)
         context = {'task':task}   

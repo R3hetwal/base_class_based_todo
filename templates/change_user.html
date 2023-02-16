@@ -1,0 +1,25 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<div class="header-bar">
+    <h1>Edit User</h1>
+</div>
+<div class="card-body">
+    <form action="" method="post">
+        {% csrf_token %}
+        {{form.errors}}
+        <p>Email:      {{form.email}} </p>
+        <p>Username:   {{form.username}} </p>
+        <p>First Name: {{form.first_name}} </p>
+        <p>Last Name:  {{form.last_name}} </p>
+        <p>Start Date: {{form.start_date}} </p>
+        <p>Login Date: {{form.last_login}} </p>
+        <p>Password:   {{form.current_password}} </p>
+        <input class="button" type="submit" value="Confirm">
+       
+    <small> <p>Don't want to update anything? <a href="{% url 'todos' %}">&#8592; Go Back</a></p>
+    </small>
+    </form>
+</div>
+{% endblock content %}

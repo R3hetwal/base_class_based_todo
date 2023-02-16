@@ -8,10 +8,12 @@
         <h3>You have <i>{{ count }} incomplete task{{ count|pluralize:'s' }}</i></h3>
     </div>
     {% if request.user.is_authenticated %}
-    <a href="{% url 'logout' %}">Logout</a>
+        <a href="{% url 'logout' %}">Logout</a>
+        <a href="{% url 'changepassword' %}">Change Password</a>
+        <a href="{% url 'changeuser' %}">Edit User</a>
     {% else %}
     <a href="{% url 'login' %}">Login</a>
-{% endif %}
+    {% endif %}
 </div>
 
 {% if request.user.is_authenticated %}

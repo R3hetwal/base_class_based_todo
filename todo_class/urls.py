@@ -4,7 +4,8 @@ from todo_class.views import *
 # from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('forbidden/', ErrorPageView.as_view(), name='forbidden'),
+    path('forbidden/', ForbiddenPageView.as_view(), name='forbidden'),
+    path('pagenotfound/', PageNotFoundView.as_view(), name='pagenotfound'),
     path('tasks/', views.TaskList.as_view(), name = 'todos'),
     # path("todo-list/", views.TaskList.as_view(), name = 'todo-list'), # To display in home url
     path("todo-create/", views.TaskCreate.as_view(), name = 'todo-create'),

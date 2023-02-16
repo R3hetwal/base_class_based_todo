@@ -1,9 +1,15 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from users.forms import LoginForm, SignupForm
+from users.forms import LoginForm, SignupForm, CustomPasswordChangeForm, EditUserProfileForm
 from users.models import User
+from django.views import View
 import re
+from django.contrib import messages
+
+class ForbiddenPageView(View):
+    def get(self, request):
+        return render(request, 'errors/403.html', status=403)
 
 def login_view(request):
     if request.method == 'POST':
@@ -71,3 +77,80 @@ def logout_view(request):
         return redirect('login')
 
     return render(request, 'logout.html')
+
+# Change Password with old password
+def password_change_view(request):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            form = CustomPasswordChangeForm(request.user, request.POST)
+
+            if form.is_valid():
+                new_password = form.cleaned_data['new_password1']
+                new_password2 = form.cleaned_data['new_password2']
+
+                ''' Perform password validation checks '''
+                if len(new_password) < 8 or not re.search("[a-z]", new_password) or not re.search("[@!#$%&^*]", new_password) or not re.search("[A-Z]", new_password) or not re.search("[0-9]", new_password):
+                    form.add_error('new_password1', 'Password must be at least 8 characters long and contain letters, numbers, and special characters')
+
+                if new_password != new_password2:
+                    form.add_error('new_password2', 'Passwords do not match')
+
+                if form.errors:
+                    return render(request, 'change_password.html', {'form': form})
+
+                ''' If password passes all validations, save the new password '''
+                fm = form.save()
+                # update_session_auth_hash(fm, User)
+                messages.success(request, 'Your password was successfully updated!')
+                return redirect('todos')
+
+        else:
+            form = CustomPasswordChangeForm(request.user)
+
+        return render(request, 'change_password.html', {'form': form})
+    else:
+        return redirect('forbidden')
+
+def user_details_change(request):
+    if request.user.is_authenticated:
+        user = request.user
+        form = EditUserProfileForm(request.POST, instance=user)
+        # fm = CustomPasswordChangeForm(request.user, request.POST)
+
+        if request.method == 'POST':
+            
+            if form.is_valid():
+                email = form.cleaned_data['email']
+                # current_password = form.cleaned_data['password']
+                allowed_domains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com']
+                
+                domain = email.split('@')[-1]
+                if domain not in allowed_domains:
+                    form.add_error('email', f'Email domain {domain} is not allowed. Please use an email from one of these domains: {", ".join(allowed_domains)}')
+                
+                else:
+                    if form.cleaned_data.get('current_password'):
+                        if user.check_password(form.cleaned_data['current_password']):
+                            form.save()
+                            update_session_auth_hash(request, form)
+                            messages.success(request, 'Your profile has been updated.')
+                            return redirect('todos')
+                        else:
+                            form.add_error('current_password', 'The current password is incorrect.')
+                    else:
+                        fm = form.save()
+                        update_session_auth_hash(request, fm)
+                        messages.success(request, 'Your profile has been updated.')
+                        return redirect('todos')
+        else:
+            form = EditUserProfileForm(instance=user)
+
+            
+        return render(request, 'change_user.html', {'form': form})
+
+    else:
+        return redirect('forbidden')
+
+
+
+
